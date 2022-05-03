@@ -1,0 +1,40 @@
+{
+  "name": "rest-api-node-mongodb-redis-jwt",
+  "version": "1.0.0",
+  "description": " Template REST-API Node.js, Redis, MongoDB, JWT, ES6 REST API",
+  "main": "app.js",
+  "scripts": {
+    "build": "babel src --out-dir build",
+    "dev": "nodemon src/app.js --exec babel-node",
+    "start": "node build/app.js",
+    "create": "babel-node src/firstInit/index.js",
+    "remove": "ACTION=remove babel-node src/firstInit/index.js"
+  },
+  "keywords": [
+    "express",
+    "mongodb",
+    "JWT",
+    "Redis",
+    "ES6"
+  ],
+  "author": "bondrogee@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-validator": "^6.14.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.10.11",
+    "redis": "^4.0.6"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.12.1",
+    "@babel/core": "^7.12.3",
+    "@babel/node": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
+    "eslint": "^8.14.0",
+    "nodemon": "^2.0.6"
+  }
+}
