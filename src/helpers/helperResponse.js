@@ -1,5 +1,5 @@
-const message = message => {
-  return typeof message === 'object' ? message : { message: [message] };
+const message = messages => {
+  return typeof messages === 'object' ? messages : { messages: [messages] };
 };
 
 const Response = {

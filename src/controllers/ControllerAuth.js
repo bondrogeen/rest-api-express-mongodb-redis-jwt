@@ -29,7 +29,7 @@ export default {
   register: async (req, res, next) => {
     try {
       const errors = validationResult(req);
-      if (!errors.isEmpty()) return Response.BadRequest(res, errors.array());
+      if (!errors.isEmpty()) return Response.BadRequest(res, { errors: errors.array() });
 
       const { email, password, name } = req.body;
       const find = await User.findOne({ email });
@@ -47,7 +47,7 @@ export default {
   login: async (req, res, next) => {
     try {
       const errors = validationResult(req);
-      if (!errors.isEmpty()) return Response.BadRequest(res, errors.array());
+      if (!errors.isEmpty()) return Response.BadRequest(res, { errors: errors.array() });
 
       const { email, password } = req.body;
       const user = await User.findOne({ email });

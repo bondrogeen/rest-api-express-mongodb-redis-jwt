@@ -1,6 +1,9 @@
-# Template REST-API Node.js, Redis, MongoDB, JWT, ES6 REST API
+# REST-API server Node.js, Redis, MongoDB, JWT, ES6 REST API
 
 Template REST-API server with roles (JWT) to access to data.
+
+## Client Vue NuxtJS Auth Vuetify : [Here](https://github.com/bondrogeen/vue-auth-jwt)
+
 
 ## Stack
 
@@ -17,7 +20,7 @@ Template REST-API server with roles (JWT) to access to data.
 
 dependencies
 
-- _express.js_ : Express is a minimal and flexible Node.js web application framework 
+- _express.js_ : Express is a minimal and flexible Node.js web application framework
 - _mongoose_ : Elegant mongodb object modeling for node.js
 - _jsonwebtoken_ : An implementation of JSON Web Tokens.
 - _dotenv_ : Allows create runtime variables
@@ -33,13 +36,12 @@ devDependencies
 - _babel/node_ : Works exactly the same as the Node.js CLI (compiling).
 - _babel/preset-env_ : Allows you to use the latest JavaScript.
 
-
 ## Get start
 
 ```
 npm i
 
-npm run create  
+npm run create
 
 npm run dev
 ```
