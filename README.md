@@ -1,4 +1,4 @@
-# REST-API server Node.js, Redis, MongoDB, JWT, ES6 REST API
+# REST-API server Node.js, Redis, MongoDB, JWT, ES6
 
 Template REST-API server with roles (JWT) to access to data.
 
