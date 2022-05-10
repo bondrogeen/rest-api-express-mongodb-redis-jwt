@@ -3,9 +3,13 @@ import bcrypt from 'bcryptjs';
 
 const userSchema = new Schema(
   {
-    name: {
+    firstName: {
       type: String,
       required: true,
+    },
+    lastName: {
+      type: String,
+      default: '',
     },
     email: {
       type: String,
@@ -22,8 +26,17 @@ const userSchema = new Schema(
         ref: 'Role',
       },
     ],
+    phone: {
+      type: String,
+      default: '',
+    },
     address: {
       type: String,
+      default: '',
+    },
+    active: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -31,6 +44,10 @@ const userSchema = new Schema(
     versionKey: false,
   }
 );
+
+userSchema.virtual('id').get(function(){
+  return this._id.toHexString();
+});
 
 userSchema.statics.encryptPassword = async password => {
   const salt = await bcrypt.genSalt(10);
@@ -43,5 +60,10 @@ userSchema.statics.comparePassword = async (password, receivedPassword) => {
 userSchema.methods.isValidPassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
+
+userSchema.set('toJSON', {
+  virtuals: true,
+  transform: function (doc, ret) {   delete ret._id  }
+});
 
 export default model('User', userSchema);

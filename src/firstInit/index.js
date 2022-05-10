@@ -35,7 +35,7 @@ async function start() {
     if (action === 'create') {
       await create(Role, ROLES);
       const roles = await Role.find();
-      const USERS = roles.map(role => ({ name: role.name, email: `${role.value}@test.com`, password, roles: [role._id] }));
+      const USERS = roles.map(role => ({ firstName: role.name, email: `${role.value}@test.com`, password, roles: [role._id] }));
       await create(User, USERS);
     }
     if (action === 'remove') {

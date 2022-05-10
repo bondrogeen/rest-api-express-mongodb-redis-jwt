@@ -9,7 +9,7 @@ export default {
   validate: method => {
     if (method === 'register') {
       return [
-        body('name', 'userName doesnt exists').exists().isLength({ min: 2 }).withMessage('min 6 char'),
+        body('firstName', 'firstName doesnt exists').exists().isLength({ min: 2 }).withMessage('min 2 char'),
         body('email', 'Invalid email').exists().isEmail(),
         body('password').exists().isLength({ min: 6 }),
       ];
@@ -31,12 +31,12 @@ export default {
       const errors = validationResult(req);
       if (!errors.isEmpty()) return Response.BadRequest(res, { errors: errors.array() });
 
-      const { email, password, name } = req.body;
+      const { email, password, firstName } = req.body;
       const find = await User.findOne({ email });
       if (find) return Response.BadRequest(res, 'user already exists');
 
       const role = await Role.findOne({ value: 'user' });
-      const user = new User({ email, name, roles: [role._id], password: await User.encryptPassword(password) });
+      const user = new User({ email, firstName, roles: [role._id], password: await User.encryptPassword(password) });
       await user.save();
       return Response.Create(res);
     } catch (error) {
