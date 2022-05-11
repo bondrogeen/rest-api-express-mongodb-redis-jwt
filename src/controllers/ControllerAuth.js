@@ -35,8 +35,8 @@ export default {
       const find = await User.findOne({ email });
       if (find) return Response.BadRequest(res, 'user already exists');
 
-      const role = await Role.findOne({ value: 'user' });
-      const user = new User({ email, firstName, roles: [role._id], password: await User.encryptPassword(password) });
+      const role = await Role.findOne({ name: 'user' });
+      const user = new User({ email, firstName, role: role.value, password: await User.encryptPassword(password) });
       await user.save();
       return Response.Create(res);
     } catch (error) {

@@ -5,7 +5,7 @@ import mongo from '../helpers/helperMongoose';
 export default {
   get: async (req, res) => {
     try {
-      const users = await User.find({}, '-password').populate('roles', '-_id').exec();
+      const users = await User.find({}, '-password').exec();
       if (!users) return Response.NotFoundUser(res);
       res.json({ users });
     } catch (error) {

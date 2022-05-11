@@ -10,7 +10,7 @@ export default {
     const token = bearerToken[1];
     const id = await jwt.verifyAccessToken(token);
     if (id) {
-      const user = await User.findOne({ _id: id }, '-password -createdAt -updatedAt').populate('roles', '-_id').exec();
+      const user = await User.findOne({ _id: id }, '-password -createdAt -updatedAt').exec();
       if (!user) return Response.NotFoundUser(res);
       req.payload = user;
       return next();

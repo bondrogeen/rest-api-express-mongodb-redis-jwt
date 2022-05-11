@@ -20,12 +20,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
-    roles: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'Role',
-      },
-    ],
+    role: {
+      type: Number,
+      default: 0,
+    },
     phone: {
       type: String,
       default: '',
@@ -45,7 +43,7 @@ const userSchema = new Schema(
   }
 );
 
-userSchema.virtual('id').get(function(){
+userSchema.virtual('id').get(function () {
   return this._id.toHexString();
 });
 
@@ -63,7 +61,9 @@ userSchema.methods.isValidPassword = async function (password) {
 
 userSchema.set('toJSON', {
   virtuals: true,
-  transform: function (doc, ret) {   delete ret._id  }
+  transform: function (doc, ret) {
+    delete ret._id;
+  },
 });
 
 export default model('User', userSchema);
