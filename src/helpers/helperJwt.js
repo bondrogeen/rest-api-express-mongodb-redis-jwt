@@ -9,7 +9,7 @@ export default {
 
   signRefreshToken: async userId => {
     const token = await jwt.sign({ id: userId }, config.token.refresh.secret, { expiresIn: config.token.refresh.expiresIn });
-    await client.SET(userId, token, 'EX', config.token.refresh.expiresIn);
+    await client.SET(userId, token, { EX: config.token.refresh.expiresIn });
     return token;
   },
 
