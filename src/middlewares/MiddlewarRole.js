@@ -4,6 +4,7 @@ import { ROLES } from '../models/ModelRole';
 export default {
   isAdmin: async (req, res, next) => {
     const user = req.payload;
+    // console.log(user)
     if (!user) return Response.Unauthorized(res);
     if (!(user?.role === ROLES.admin)) return Response.Forbidden(res);
     next();
