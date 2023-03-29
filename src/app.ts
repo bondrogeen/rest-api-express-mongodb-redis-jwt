@@ -1,11 +1,11 @@
-import express from 'express';
+import express, { Express, Request, Response } from 'express';
 import mongoose from 'mongoose';
 
 import config from './config';
-import router from './routes/index.js';
+import router from './routes/';
 import client from './db/redis';
 
-const app = express();
+const app: Express = express();
 app.use(express.json());
 
 async function start() {
@@ -24,5 +24,5 @@ async function start() {
 start();
 
 process.on('SIGINT', () => {
-  client.quit();
+  // client.quit();
 });

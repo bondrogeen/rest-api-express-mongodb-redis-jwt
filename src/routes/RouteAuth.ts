@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { auth } from '../controllers/index';
+import { auth } from '../controllers/';
 import { jwt } from '../middlewares';
 
 const router = Router();

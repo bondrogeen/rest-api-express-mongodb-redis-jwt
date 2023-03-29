@@ -1,12 +1,14 @@
+import { Request, Response, NextFunction } from 'express';
+
 import { body, validationResult } from 'express-validator/check';
 
-import { User, Role } from '../models/index.js';
-import jwt from '../helpers/helperJwt.js';
-import Response from '../helpers/helperResponse';
+import { User, Role } from '../models/';
+import jwt from '../helpers/helperJwt';
+import HelpResponse from '../helpers/helperResponse';
 import client from '../db/redis';
 
 export default {
-  validate: method => {
+  validate: (method: string) => {
     if (method === 'register') {
       return [
         body('firstName', 'firstName doesnt exists').exists().isLength({ min: 2 }).withMessage('min 2 char'),
@@ -20,74 +22,74 @@ export default {
     }
   },
 
-  getCurrentUser: async (req, res) => {
+  getCurrentUser: async (req: Request, res: Response) => {
     const user = req.payload;
-    if (!user) return Response.NotFoundUser(res);
+    if (!user) return HelpResponse.NotFoundUser(res);
     res.json({ user });
   },
 
-  register: async (req, res, next) => {
+  register: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const errors = validationResult(req);
-      if (!errors.isEmpty()) return Response.BadRequest(res, { errors: errors.array() });
+      if (!errors.isEmpty()) return HelpResponse.BadRequest(res, { errors: errors.array() });
 
       const { email, password, firstName } = req.body;
       const find = await User.findOne({ email });
-      if (find) return Response.BadRequest(res, 'user already exists');
+      if (find) return HelpResponse.BadRequest(res, 'user already exists');
 
       const role = await Role.findOne({ name: 'user' });
       const user = new User({ email, firstName, role: role.value, password: await User.encryptPassword(password) });
       await user.save();
-      return Response.Create(res);
+      return HelpResponse.Create(res);
     } catch (error) {
-      next(Response.InternalServerError(res, error.message));
+      next(HelpResponse.InternalServerError(res));
     }
   },
 
-  login: async (req, res, next) => {
+  login: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const errors = validationResult(req);
-      if (!errors.isEmpty()) return Response.BadRequest(res, { errors: errors.array() });
+      if (!errors.isEmpty()) return HelpResponse.BadRequest(res, { errors: errors.array() });
 
       const { email, password } = req.body;
       const user = await User.findOne({ email });
-      if (!user) return Response.NotFoundUser(res);
-      if (!(await user.isValidPassword(password))) return Response.InvalidUserOrPass(res);
+      if (!user) return HelpResponse.NotFoundUser(res);
+      if (!(await user.isValidPassword(password))) return HelpResponse.InvalidUserOrPass(res);
 
       const accessToken = await jwt.signAccessToken(user.id);
       const refreshToken = await jwt.signRefreshToken(user.id);
-      return Response.Ok(res, { accessToken, refreshToken });
+      return HelpResponse.Ok(res, { accessToken, refreshToken });
     } catch (error) {
-      next(Response.InternalServerError(res, error.message));
+      next(HelpResponse.InternalServerError(res));
     }
   },
 
-  refresh: async (req, res, next) => {
+  refresh: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { refreshToken } = req.body;
-      if (!refreshToken) return Response.BadRequest(res, {});
+      if (!refreshToken) return HelpResponse.BadRequest(res, {});
       const userId = await jwt.verifyRefreshToken(refreshToken);
-      if (!userId) return Response.Unauthorized(res);
+      if (!userId) return HelpResponse.Unauthorized(res);
 
       const accessToken = await jwt.signAccessToken(userId);
       const refToken = await jwt.signRefreshToken(userId);
-      Response.Ok(res, { accessToken: accessToken, refreshToken: refToken });
+      HelpResponse.Ok(res, { accessToken: accessToken, refreshToken: refToken });
     } catch (error) {
-      next(Response.InternalServerError(res, error.message));
+      next(HelpResponse.InternalServerError(res));
     }
   },
 
-  logout: async (req, res, next) => {
+  logout: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const authHeader = req.headers?.['authorization'] || '';
-      if (!authHeader) return Response.Unauthorized(res);
+      if (!authHeader) return HelpResponse.Unauthorized(res);
       const bearerToken = authHeader.split(' ');
       const token = bearerToken[1];
       const userId = await jwt.verifyAccessToken(token);
       await client.DEL(userId);
-      return Response.Ok(res);
+      return HelpResponse.Ok(res);
     } catch (error) {
-      next(Response.InternalServerError(res, error.message));
+      next(HelpResponse.InternalServerError(res));
     }
   },
 };

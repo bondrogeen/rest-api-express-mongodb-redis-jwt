@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Role, User } from '../models/';
+import { Role, User } from '../models';
 import { ROLES } from '../models/ModelRole';
 import config from '../config';
 

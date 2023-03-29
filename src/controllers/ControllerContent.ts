@@ -1,12 +1,14 @@
+import { Request, Response } from 'express';
+
 import client from '../db/redis';
-import { Role } from '../models/index';
-import Response from '../helpers/helperResponse';
+import { Role } from '../models/';
+import helperResponse from '../helpers/helperResponse';
 
 const key = 'content';
 const timeLife = 60 * 60 * 24;
 
 export default {
-  get: async (req, res) => {
+  get: async (req: Request, res: Response) => {
     try {
       let roles = await client.get(key);
       if (!roles) {
@@ -17,7 +19,7 @@ export default {
       }
       res.json({ roles });
     } catch (error) {
-      Response.InternalServerError(res);
+      helperResponse.InternalServerError(res);
     }
   },
 };

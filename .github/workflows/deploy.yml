@@ -1,0 +1,33 @@
+name: Build
+on: [push]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm install
+      - run: npm run build
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          known_hosts: unnecessary
+
+      - name: Adding Known Hosts
+        run: ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }}  >> ~/.ssh/known_hosts && ls && ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+
+      - name: Deploy with .nuxt
+        run: rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }}" ./.nuxt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/www/nuxt_blog/
+
+      - name: Deploy with .output
+        run: rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }}" ./.output ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/www/nuxt_blog/
+
+      - name: Deploy with ./ecosystem.config.js
+        run: rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }}" ./ecosystem.config.js ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/www/nuxt_blog/
+
+      - name: pm2 restart
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd /home/${{ secrets.SSH_USER }}/www/nuxt_blog/ && pm2 restart nuxt_blog"
