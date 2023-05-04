@@ -8,13 +8,8 @@ export const ROLES = {
 
 const roleSchema = new Schema(
   {
-    name: {
-      type: String,
-    },
-    value: {
-      type: Number,
-      unique: true,
-    },
+    name: { type: String },
+    value: { type: Number, unique: true },
   },
   {
     versionKey: false,

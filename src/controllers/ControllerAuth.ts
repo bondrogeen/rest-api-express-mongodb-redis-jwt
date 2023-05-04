@@ -6,6 +6,7 @@ import { User, Role } from '../models/';
 import jwt from '../helpers/helperJwt';
 import HelpResponse from '../helpers/helperResponse';
 import client from '../db/redis';
+import config from '../config';
 
 export default {
   validate: (method: string) => {
@@ -54,12 +55,20 @@ export default {
       const { email, password } = req.body;
       const user = await User.findOne({ email });
       if (!user) return HelpResponse.NotFoundUser(res);
-      if (!(await user.isValidPassword(password))) return HelpResponse.InvalidUserOrPass(res);
 
-      const accessToken = await jwt.signAccessToken(user.id);
-      const refreshToken = await jwt.signRefreshToken(user.id);
+      const isValid = await user.isValidPassword(password);
+      if (!isValid) return HelpResponse.InvalidUserOrPass(res);
+
+      const { id } = user;
+
+      const accessToken = jwt.signAccessToken({ id });
+      const refreshToken = jwt.signRefreshToken({ id });
+
+      await client.SET(id, refreshToken, { EX: config.token.refresh.expiresIn });
       return HelpResponse.Ok(res, { accessToken, refreshToken });
     } catch (error) {
+      console.log(error);
+
       next(HelpResponse.InternalServerError(res));
     }
   },
@@ -68,13 +77,17 @@ export default {
     try {
       const { refreshToken } = req.body;
       if (!refreshToken) return HelpResponse.BadRequest(res, {});
-      const userId = await jwt.verifyRefreshToken(refreshToken);
-      if (!userId) return HelpResponse.Unauthorized(res);
+      const payload = jwt.verifyRefreshToken(refreshToken);
+      console.log(payload);
+      if (!payload) return HelpResponse.Unauthorized(res);
 
-      const accessToken = await jwt.signAccessToken(userId);
-      const refToken = await jwt.signRefreshToken(userId);
-      HelpResponse.Ok(res, { accessToken: accessToken, refreshToken: refToken });
+      // const accessToken = await jwt.signAccessToken(userId);
+      // const refToken = await jwt.signRefreshToken(userId);
+      // const result = await client.GET(user.id);
+      // HelpResponse.Ok(res, { accessToken: accessToken, refreshToken: refToken });
+      HelpResponse.Ok(res, {});
     } catch (error) {
+      console.log(error);
       next(HelpResponse.InternalServerError(res));
     }
   },
@@ -83,10 +96,10 @@ export default {
     try {
       const authHeader = req.headers?.['authorization'] || '';
       if (!authHeader) return HelpResponse.Unauthorized(res);
-      const bearerToken = authHeader.split(' ');
-      const token = bearerToken[1];
-      const userId = await jwt.verifyAccessToken(token);
-      await client.DEL(userId);
+      // const bearerToken = authHeader.split(' ');
+      // const token = bearerToken[1];
+      // const userId = await jwt.verifyAccessToken(token);
+      // await client.DEL(userId);
       return HelpResponse.Ok(res);
     } catch (error) {
       next(HelpResponse.InternalServerError(res));
