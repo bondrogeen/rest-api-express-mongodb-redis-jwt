@@ -1,5 +1,7 @@
 import { body, validationResult } from 'express-validator';
 
+import { jsonParse } from '../utils/general'
+
 import { User, Role } from '../models/index';
 import Response from '../helpers/helperResponse';
 import mongo from '../helpers/helperMongoose';
@@ -29,9 +31,15 @@ export default {
 	},
 
 	get: async (req, res) => {
-		const users = await User.find({}, '-password').exec();
-		if (!users) return Response.NotFoundUser(res);
-		res.json({ users });
+		const { page = 1, limit = 2, sort = {} } = req.query;
+		const users = await User.find({}, '-password')
+			.limit(limit * 1)
+			.skip((page - 1) * limit)
+			.sort(jsonParse(sort))
+			.exec();
+		const count = await User.countDocuments();
+		if (!users) return Response.NotFound(res);
+		res.json({ items: users, meta: { total: Math.ceil(count / limit), current: page, } });
 	},
 
 	getById: async (req, res) => {
