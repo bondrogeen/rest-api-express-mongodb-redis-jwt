@@ -1,10 +1,10 @@
 import { body, validationResult } from 'express-validator';
 
-import { jsonParse } from '../utils/general'
-
 import { User, Role } from '../models/index';
+
 import Response from '../helpers/helperResponse';
-import mongo from '../helpers/helperMongoose';
+import { isValid, parseQuery } from '../helpers/helperMongoose';
+
 
 export default {
 	validate: {
@@ -31,20 +31,20 @@ export default {
 	},
 
 	get: async (req, res) => {
-		const { page = 1, limit = 2, sort = {} } = req.query;
+		const { skip, page, limit, sort } = parseQuery(req.query);
 		const users = await User.find({}, '-password')
-			.limit(limit * 1)
-			.skip((page - 1) * limit)
-			.sort(jsonParse(sort))
+			.limit(limit)
+			.skip(skip)
+			.sort(sort)
 			.exec();
 		const count = await User.countDocuments();
 		if (!users) return Response.NotFound(res);
-		res.json({ items: users, meta: { total: Math.ceil(count / limit), current: page, } });
+		res.json({ items: users, meta: { total: Math.ceil(count / limit), current: +page, } });
 	},
 
 	getById: async (req, res) => {
 		const { id } = req.params;
-		if (!id || !mongo.isValid(id)) return Response.InvalidParams(res);
+		if (!id || !isValid(id)) return Response.InvalidParams(res);
 		const user = await User.findOne({ _id: id }, '-password -createdAt -updatedAt').populate('roles', '-_id').exec();
 		if (!user) return Response.NotFoundUser(res);
 		res.json(user);
@@ -56,14 +56,14 @@ export default {
 		if (!errors.isEmpty()) return Response.BadRequest(res, { errors: errors.array() });
 
 		const { firstName, lastName, phone, address } = req.body;
-		if (!id || !firstName || !mongo.isValid(id)) return Response.InvalidParams(res);
+		if (!id || !firstName || !isValid(id)) return Response.InvalidParams(res);
 		const result = await User.findOneAndUpdate({ _id: id }, { firstName, lastName, phone, address });
 		Response.Ok(res);
 	},
 
 	deleteById: async (req, res) => {
 		const { id } = req.params;
-		if (!id || !mongo.isValid(id)) return Response.InvalidParams(res);
+		if (!id || !isValid(id)) return Response.InvalidParams(res);
 		const result = await User.deleteOne({ _id: id }).exec();
 		Response.Ok(res);
 	},

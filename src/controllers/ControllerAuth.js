@@ -3,16 +3,17 @@ import { body, validationResult } from 'express-validator';
 import { User, Role } from '../models/index.js';
 import jwt from '../helpers/helperJwt.js';
 import Response from '../helpers/helperResponse';
+import { getErrors } from '../utils/general'
 import client from '../db/redis';
 
 export default {
 	validate: {
 		register: [
-			body('firstName', 'firstName doesnt exists').exists().isLength({ min: 2 }).withMessage('min 2 char'),
-			body('email', 'Invalid email').exists().isEmail(),
-			body('password').exists().isLength({ min: 6 }),
+			body('firstName', 'errors.doesntExists').exists().isLength({ min: 2 }).withMessage('errors.minLength2'),
+			body('email', 'errors.invalidEmail').exists().isEmail(),
+			body('password', 'errors.doesntExists').exists().isLength({ min: 6 }).withMessage('errors.minLength6'),
 		],
-		login: [body('email', 'Invalid email').exists().isEmail(), body('password').exists()],
+		login: [body('email', 'errors.invalidEmail').exists().isEmail(), body('password', 'errors.doesntExists').exists()],
 	},
 
 	getCurrentUser: async (req, res) => {
@@ -23,7 +24,7 @@ export default {
 
 	register: async (req, res) => {
 		const errors = validationResult(req);
-		if (!errors.isEmpty()) return Response.BadRequest(res, { errors: errors.array() });
+		if (!errors.isEmpty()) return Response.BadRequest(res, getErrors(errors.array()));
 
 		const { email, password, firstName } = req.body;
 		const find = await User.findOne({ email });
@@ -41,7 +42,7 @@ export default {
 
 		const { email, password } = req.body;
 		const user = await User.findOne({ email });
-		if (!user) return Response.NotFoundUser(res);
+		if (!user) return Response.InvalidUserOrPass(res);
 		if (!(await user.isValidPassword(password))) return Response.InvalidUserOrPass(res);
 
 		const accessToken = await jwt.signAccessToken(user.id);
@@ -50,18 +51,12 @@ export default {
 	},
 
 	refresh: async (req, res) => {
-		console.log('refresh');
 		const { refreshToken } = req.body;
-		console.log('refreshToken', refreshToken);
 		if (!refreshToken) return Response.BadRequest(res, {});
 		const userId = await jwt.verifyRefreshToken(refreshToken);
-		console.log('userId', userId);
 		if (!userId) return Response.Unauthorized(res);
-		
 		const accessToken = await jwt.signAccessToken(userId);
 		const refToken = await jwt.signRefreshToken(userId);
-		console.log('accessToken', accessToken);
-		console.log('refToken', refToken);
 		Response.Ok(res, { accessToken: accessToken, refreshToken: refToken });
 	},
 
