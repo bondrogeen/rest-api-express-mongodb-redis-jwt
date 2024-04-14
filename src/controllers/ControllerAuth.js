@@ -9,11 +9,12 @@ import client from '../db/redis';
 export default {
 	validate: {
 		register: [
-			body('firstName', 'errors.doesntExists').exists().isLength({ min: 2 }).withMessage('errors.minLength2'),
 			body('email', 'errors.invalidEmail').exists().isEmail(),
 			body('password', 'errors.doesntExists').exists().isLength({ min: 6 }).withMessage('errors.minLength6'),
+			body('rePassword', 'errors.doesntExists').exists().custom((v, { req }) => v === req.body.password).withMessage('errors.doesntMatch'),
 		],
 		login: [body('email', 'errors.invalidEmail').exists().isEmail(), body('password', 'errors.doesntExists').exists()],
+		recovery: [body('email', 'errors.invalidEmail').exists().isEmail()],
 	},
 
 	getCurrentUser: async (req, res) => {
@@ -26,14 +27,25 @@ export default {
 		const errors = validationResult(req);
 		if (!errors.isEmpty()) return Response.BadRequest(res, getErrors(errors.array()));
 
-		const { email, password, firstName } = req.body;
+		const { email, password } = req.body;
 		const find = await User.findOne({ email });
 		if (find) return Response.BadRequest(res, 'user already exists');
 
 		const role = await Role.findOne({ name: 'user' });
-		const user = new User({ email, firstName, role: role.value, password: await User.encryptPassword(password) });
+		const user = new User({ email, role: role.value, password: await User.encryptPassword(password) });
 		await user.save();
 		return Response.Create(res);
+	},
+
+	recovery: async (req, res) => {
+		const errors = validationResult(req);
+		if (!errors.isEmpty()) return Response.BadRequest(res, { errors: errors.array() });
+
+		const { email } = req.body;
+		const user = await User.findOne({ email });
+		if (!user) return Response.InvalidUserOrPass(res);
+		// todo
+		return Response.Ok(res, {});
 	},
 
 	login: async (req, res) => {

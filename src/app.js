@@ -6,6 +6,7 @@ import qs from 'qs';
 import config from './config';
 import router from './routes/index.js';
 import client from './db/redis';
+import globalErrors from './helpers/globalErrors';
 
 console.log(config);
 
@@ -20,6 +21,8 @@ async function start() {
     await client.connect();
     app.use(morgan("combined"))
     app.use(config.server.prefix, router);
+
+    app.use(globalErrors());
 
     app.listen(config.server.port, () => {
       console.log(`Start server, port: ${config.server.port}`);

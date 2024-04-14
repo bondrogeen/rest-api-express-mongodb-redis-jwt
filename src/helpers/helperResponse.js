@@ -3,8 +3,8 @@ const message = messages => {
 };
 
 const Response = {
-  Ok: (res, msg) => res.status(200).json(message(msg || { succes: true })),
-  Create: (res, msg) => res.status(201).json(message(msg || { succes: true })),
+  Ok: (res, msg) => res.status(200).json(message(msg || { success: true })),
+  Create: (res, msg) => res.status(201).json(message(msg || { success: true })),
   Forbidden: (res, msg) => res.status(403).json(message(msg || 'Access is denied')),
   BadRequest: (res, msg) => res.status(400).json(message(msg || 'Bad Request')),
   Unauthorized: (res, msg) => res.status(401).json(message(msg || 'Unauthorized')),

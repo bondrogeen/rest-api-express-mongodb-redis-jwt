@@ -9,6 +9,7 @@ const router = Router();
 router.post('/register/', auth.validate.register, catchErrors(auth.register));
 router.get('/user/', [jwt.verifyAccessToken], catchErrors(auth.getCurrentUser));
 router.post('/login/', auth.validate.login, catchErrors(auth.login));
+router.post('/recovery/', auth.validate.recovery, catchErrors(auth.recovery));
 router.post('/refresh/', catchErrors(auth.refresh));
 router.post('/logout/', catchErrors(auth.logout));
 

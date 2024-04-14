@@ -22,5 +22,5 @@ export const getErrors = (errors) => ({ errors: mapErrors(errors) })
 
 export const isNumber = (num) => typeof num === 'number' && !isNaN(num);
 
-export const getNumber = (num, def = 1) => isNumber(num) ? num : def
+export const getNumber = (num, def = 1) => isNumber(+num) ? +num : def
 

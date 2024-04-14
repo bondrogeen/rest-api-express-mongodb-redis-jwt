@@ -24,12 +24,9 @@ export default {
 
   verifyRefreshToken: async refreshToken => {
     try {
-      console.log(refreshToken);
       const user = await jwt.verify(refreshToken, config.token.refresh.secret);
-      console.log(user);
       if (!user) return false;
       const result = await client.GET(user.id);
-      console.log(result);
       return refreshToken === result ? user?.id : false;
     } catch (error) {
       return
